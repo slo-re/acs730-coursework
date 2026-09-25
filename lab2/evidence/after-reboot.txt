@@ -1,0 +1,15 @@
+Fri Sep 25 00:13:09 UTC 2026
+3c865211-4943-47b2-a751-890c17b49be0
+enabled
+● acs730-web.service - ACS730 web application
+     Loaded: loaded (/etc/systemd/system/acs730-web.service; enabled; preset: disabled)
+     Active: active (running) since Fri 2026-09-25 00:11:49 UTC; 1min 20s ago
+   Main PID: 1861 (python3)
+      Tasks: 1 (limit: 1059)
+     Memory: 9.1M
+        CPU: 111ms
+     CGroup: /system.slice/acs730-web.service
+             └─1861 /usr/bin/python3 /opt/acs730-web/app.py
+
+Sep 25 00:11:49 ip-172-31-24-57.ec2.internal systemd[1]: Started acs730-web.service - ACS730 web application.
+ok

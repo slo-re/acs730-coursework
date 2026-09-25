@@ -1,0 +1,21 @@
+[Unit]
+Description=ACS730 web application
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=acs730web
+Group=acs730web
+WorkingDirectory=/opt/acs730-web
+ExecStart=/usr/bin/python3 /opt/acs730-web/app.py
+Restart=on-failure
+NoNewPrivileges=true
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
