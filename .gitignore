@@ -1,6 +1,6 @@
-.pem
-.tfstate
-.tfstate.backup
+*.pem
+*.tfstate
+*.tfstate.backup
 .terraform/
 .env
 credentials

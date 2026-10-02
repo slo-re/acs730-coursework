@@ -1,0 +1,17 @@
+==> Installing packages
+Last metadata expiration check: 0:13:15 ago on Fri Oct  2 00:09:53 2026.
+Package python3-3.9.25-1.amzn2023.0.9.x86_64 is already installed.
+Dependencies resolved.
+Nothing to do.
+Complete!
+==> Creating service user acs730web if it does not exist
+==> Laying down the application in /opt/acs730-web
+==> Installing the systemd unit
+==> Enabling and starting the service
+==> Done. Local check:
+<!doctype html>
+<html><head><title>ACS730 Lab 2</title></head>
+<body><h1>ACS730 Lab 2</h1>
+enabled
+USER                 CMD
+acs730web            /usr/bin/python3 -m http.server 80 --directory /opt/acs730-web

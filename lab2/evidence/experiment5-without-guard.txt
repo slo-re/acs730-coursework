@@ -1,0 +1,22 @@
+=== Test run 1 ===
+==> Installing packages
+Last metadata expiration check: 0:11:23 ago on Fri Oct  2 00:09:53 2026.
+Package python3-3.9.25-1.amzn2023.0.9.x86_64 is already installed.
+Dependencies resolved.
+Nothing to do.
+Complete!
+==> Creating service user acs730web if it does not exist
+useradd: user 'acs730web' already exists
+Exit code: 9
+=== Test run 2 ===
+==> Installing packages
+Last metadata expiration check: 0:11:24 ago on Fri Oct  2 00:09:53 2026.
+Package python3-3.9.25-1.amzn2023.0.9.x86_64 is already installed.
+Dependencies resolved.
+Nothing to do.
+Complete!
+==> Creating service user acs730web if it does not exist
+useradd: user 'acs730web' already exists
+Exit code: 9
+active
+enabled
