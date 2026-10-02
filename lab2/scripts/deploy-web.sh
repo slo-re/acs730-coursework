@@ -1,70 +1,41 @@
 #!/usr/bin/env bash
+# Deploy the ACS730 demo web app on Amazon Linux 2023.
+# Safe to run more than once.
 set -euo pipefail
 
-UNIT_SOURCE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/acs730-web.service"
-APP_DIR=/opt/acs730-web
-APP_USER=acs730web
-TMP_APP="$(mktemp)"
-trap 'rm -f "$TMP_APP"' EXIT
+APP_USER="acs730web"
+APP_DIR="/opt/acs730-web"
+UNIT_SRC="$(dirname "$0")/../acs730-web.service"
+UNIT_DST="/etc/systemd/system/acs730-web.service"
 
-sudo dnf install -y python3
+echo "==> Installing packages"
+sudo dnf -y install python3
 
-if ! id "$APP_USER" >/dev/null 2>&1; then
-    sudo useradd --system --user-group --no-create-home \
-        --shell /sbin/nologin "$APP_USER"
+echo "==> Creating service user $APP_USER if it does not exist"
+if ! id -u "$APP_USER" >/dev/null 2>&1; then
+    sudo useradd --system --no-create-home --shell /sbin/nologin "$APP_USER"
 fi
 
-sudo install -d -o "$APP_USER" -g "$APP_USER" -m 0755 "$APP_DIR"
+echo "==> Laying down the application in $APP_DIR"
+sudo mkdir -p "$APP_DIR"
+sudo tee "$APP_DIR/index.html" >/dev/null <<'HTML'
+<!doctype html>
+<html><head><title>ACS730 Lab 2</title></head>
+<body><h1>ACS730 Lab 2</h1>
+<p>Deployed by deploy-web.sh and kept alive by systemd.</p>
+</body></html>
+HTML
+sudo chown -R "$APP_USER:$APP_USER" "$APP_DIR"
 
-cat > "$TMP_APP" <<'PY'
-from datetime import datetime, timezone
-from html import escape
-from http.server import BaseHTTPRequestHandler, HTTPServer
-from socket import gethostname
-
-
-class Handler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        if self.path not in ("/", "/health"):
-            self.send_error(404)
-            return
-
-        if self.path == "/health":
-            body = "ok\n"
-            content_type = "text/plain; charset=utf-8"
-        else:
-            now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
-            body = (
-                "<!doctype html><html><body>"
-                "<h1>ACS730 web application</h1>"
-                f"<p>Host: {escape(gethostname())}</p>"
-                f"<p>Current server time: {now}</p>"
-                "</body></html>\n"
-            )
-            content_type = "text/html; charset=utf-8"
-
-        data = body.encode("utf-8")
-        self.send_response(200)
-        self.send_header("Content-Type", content_type)
-        self.send_header("Content-Length", str(len(data)))
-        self.end_headers()
-        self.wfile.write(data)
-
-
-HTTPServer(("0.0.0.0", 80), Handler).serve_forever()
-PY
-
-sudo install -o "$APP_USER" -g "$APP_USER" -m 0644 "$TMP_APP" "$APP_DIR/app.py"
-sudo install -o root -g root -m 0644 "$UNIT_SOURCE" \
-    /etc/systemd/system/acs730-web.service
-
+echo "==> Installing the systemd unit"
+sudo cp "$UNIT_SRC" "$UNIT_DST"
+sudo chmod 644 "$UNIT_DST"
 sudo systemctl daemon-reload
+
+echo "==> Enabling and starting the service"
 sudo systemctl enable acs730-web
+sudo systemctl restart acs730-web
 
-if sudo systemctl is-active --quiet acs730-web; then
-    sudo systemctl restart acs730-web
-else
-    sudo systemctl start acs730-web
-fi
-
-sudo systemctl --no-pager status acs730-web
+echo "==> Done. Local check:"
+sleep 1
+curl -fsS http://localhost/ | head -3

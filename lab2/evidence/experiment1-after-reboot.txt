@@ -1,0 +1,5 @@
+inactive
+disabled
+○ acs730-web.service - ACS730 Lab 2 demo web application
+     Loaded: loaded (/etc/systemd/system/acs730-web.service; disabled; preset: disabled)
+     Active: inactive (dead)
