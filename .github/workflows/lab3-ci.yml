@@ -19,3 +19,8 @@ jobs:
             echo "checking $f"
             bash -n "$f"
           done
+
+      - name: Test environment check script
+        env:
+          AWS_REGION: us-east-1
+        run: bash lab3/scripts/check-env.sh
