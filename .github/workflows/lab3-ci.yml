@@ -20,7 +20,13 @@ jobs:
             bash -n "$f"
           done
 
-      - name: Test environment check script
-        env:
-          AWS_REGION: us-east-1
-        run: bash lab3/scripts/check-env.sh
+                - name: Test missing AWS_REGION is rejected
+        run: |
+          set -euo pipefail
+          if output=$(env -u AWS_REGION bash lab3/scripts/check-env.sh 2>&1); then
+            printf '%s\n' "$output"
+            echo "ERROR: check-env.sh accepted a missing AWS_REGION"
+            exit 1
+          fi
+          printf '%s\n' "$output"
+          grep -q "AWS_REGION is not set" <<< "$output"
