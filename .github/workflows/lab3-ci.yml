@@ -20,7 +20,7 @@ jobs:
             bash -n "$f"
           done
 
-                - name: Test missing AWS_REGION is rejected
+      - name: Test missing AWS_REGION is rejected
         run: |
           set -euo pipefail
           if output=$(env -u AWS_REGION bash lab3/scripts/check-env.sh 2>&1); then
