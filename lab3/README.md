@@ -48,3 +48,7 @@ This showed me why remote state is important when using GitHub Actions. Without 
 **Prediction:**
 
 I expect the GitHub Actions deployment to fail after ending my AWS lab session because the temporary credentials will no longer be valid. I predict the workflow will fail when it tries to authenticate with AWS and return an ExpiredToken error.
+
+**Result:**
+
+After ending my Vocareum session, I reran the GitHub Actions deployment and it failed during terraform init because AWS returned a 403 Forbidden error when accessing the S3 state file. After restarting the lab and refreshing the AWS credentials, I reran the workflow and it completed successfully with no infrastructure changes needed. I did not need to modify any repository files to fix the deployment.
