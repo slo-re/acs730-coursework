@@ -1,0 +1,10 @@
+# Every common mistake, on purpose.
+FROM python:latest
+
+WORKDIR /app
+
+COPY . .
+
+RUN pip install -r requirements.txt
+
+CMD python -m gunicorn --bind 0.0.0.0:8000 app:app
