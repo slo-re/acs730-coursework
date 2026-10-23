@@ -145,3 +145,24 @@ AWS Academy credentials.
 For a production application hosted entirely in AWS, I would also
 consider CodePipeline, CodeBuild, and ECR because of their direct
 integration with AWS services and IAM.
+
+
+## SHA Tagging and Reusable CI/CD Components
+
+### Why SHA Tags Instead of latest?
+
+I used commit SHA tags for GHCR images because they identify
+the specific code version used to build each image. Unlike
+latest, which can point to a different image after each push,
+SHA tags make it easier to trace deployments, reproduce builds,
+and roll back to an earlier version.
+
+### Composite Action vs Reusable Workflow
+
+I used a composite action for Python dependency setup because
+these steps need to run within each test job on the same runner.
+
+I used a reusable workflow for the Docker image build because
+it represents an entire job with its own runner and permissions.
+This also allows package publishing permissions to be limited
+to the appropriate build job rather than granted to test jobs.
