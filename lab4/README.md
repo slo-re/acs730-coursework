@@ -39,3 +39,4 @@ The initial naive image build took 26.425 seconds.
 
 - Security: The optimized image runs as a non-root user called appuser, while the naive image runs as root.
 
+
