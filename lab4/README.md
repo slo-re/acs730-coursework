@@ -76,3 +76,72 @@ GitHub Actions runs used:
 - Cache miss: 39877080302
 - Cache hit: 39877772001
 
+
+## Experiments
+
+### Experiment 1 - Removing .dockerignore
+
+Prediction: Removing .dockerignore will increase the Docker build
+context because more files will be sent to Docker. However, I expect
+the optimized image size to remain almost unchanged because the
+Dockerfile only copies requirements.txt and app.py.
+
+
+Observation: With .dockerignore, the application build context
+transferred 510 bytes. Without it, the context transferred only
+181 bytes. Both builds produced the same 130 MB image.
+
+Explanation: My prediction was not supported by this test.
+Docker BuildKit can optimize context transfers based on which
+files the Dockerfile actually needs. Since my optimized Dockerfile
+copies only requirements.txt and app.py, removing .dockerignore
+did not increase the final image size. The ignore file is still
+useful for larger projects and Dockerfiles that copy entire directories.
+
+
+### Experiment 2 - Changing Docker Layer Order
+
+Prediction: Moving COPY app.py before the dependency installation
+will make rebuilding slower after application code changes.
+Docker will invalidate the dependency installation layer,
+forcing pip install to run again even though requirements.txt
+has not changed.
+
+
+Observation: The optimized Dockerfile rebuilt in 0.651 seconds,
+while the inefficient Dockerfile took 6.736 seconds. The optimized
+build reused the cached pip installation layer, whereas the
+inefficient build ran pip install again.
+
+Explanation: My prediction was correct. Docker caches each
+instruction as a layer. When COPY app.py comes before pip install,
+changing the application invalidates the layers that follow it.
+By installing dependencies before copying application code, Docker
+can reuse the dependency layer when requirements.txt has not changed.
+This made the optimized rebuild approximately 10 times faster.
+
+## GitHub Actions vs AWS-Native CI/CD
+
+For this project, I would recommend GitHub Actions because the
+source code is already hosted on GitHub, and the workflows can
+build, test, and publish Docker images without requiring AWS
+credentials.
+
+The AWS-native alternative would use CodePipeline to coordinate
+pipeline stages, CodeBuild to run builds and tests, and Amazon ECR
+to store container images instead of GHCR.
+
+GitHub Actions uses GitHub-hosted runners and a GITHUB_TOKEN with
+permissions controlled by the workflow. The AWS-native approach
+would use CodeBuild environments and IAM roles to access AWS
+services such as ECR.
+
+In our AWS Academy environment, IAM permissions are restricted,
+which makes setting up some AWS-native deployment components more
+difficult. GitHub Actions was easier to implement for this lab
+because Docker builds and GHCR publishing did not require temporary
+AWS Academy credentials.
+
+For a production application hosted entirely in AWS, I would also
+consider CodePipeline, CodeBuild, and ECR because of their direct
+integration with AWS services and IAM.
