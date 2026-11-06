@@ -27,7 +27,7 @@ resource "aws_vpc" "main" {
   enable_dns_support   = true
   enable_dns_hostnames = true
   tags                 = merge(local.common_tags, { Name = "${local.name}-vpc" })
-}
+   }
 
 resource "aws_subnet" "public" {
   for_each = local.public_subnets
