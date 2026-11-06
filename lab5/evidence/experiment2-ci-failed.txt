@@ -1,0 +1,6 @@
+fmt and validate	Run terraform fmt -check -recursive	﻿2026-11-06T01:48:25.6788106Z ##[group]Run terraform fmt -check -recursive
+fmt and validate	Run terraform fmt -check -recursive	2026-11-06T01:48:25.6788611Z ^[[36;1mterraform fmt -check -recursive^[[0m
+fmt and validate	Run terraform fmt -check -recursive	2026-11-06T01:48:25.6814184Z shell: /usr/bin/bash -e {0}
+fmt and validate	Run terraform fmt -check -recursive	2026-11-06T01:48:25.6814490Z ##[endgroup]
+fmt and validate	Run terraform fmt -check -recursive	2026-11-06T01:48:25.7237295Z network.tf
+fmt and validate	Run terraform fmt -check -recursive	2026-11-06T01:48:25.7269832Z ##[error]Process completed with exit code 3.

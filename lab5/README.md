@@ -30,7 +30,7 @@ A controlled real AWS test would be more appropriate after the configuration has
 
 ## Experiments
 
-Two experiments will be documented after testing.
+
 
 ### Experiment 1 — Removing depends_on
 
@@ -38,7 +38,7 @@ Prediction: Removing the explicit depends_on should not change the number of res
 
 Removing the dependency does change the ordering Terraform can use during deployment. The EC2 instance references its subnet and security group, but those references do not guarantee that the internet route is ready before the instance starts.
 
-LocalStack may not reveal this issue because it simulates EC2 rather than booting a real virtual machine. I restored depends_on afterward.
+LocalStack may not reveal this issue because it simulates EC2 rather than booting a real virtual machine. Both plans showed 10 resources to add, with no changes or destructions. I restored depends_on afterward.
 
 
 ### Experiment 2 — Breaking Terraform formatting
@@ -47,3 +47,10 @@ Prediction: Incorrect indentation should cause the fmt and validate CI job to fa
 
 Because the LocalStack job depends on the first job using needs, it should be skipped instead of running unnecessarily.
 
+
+### Final Experiment 2 Result
+
+The formatting check failed as predicted while terraform validate
+succeeded locally. In GitHub Actions, the formatting gate failed,
+so the LocalStack deployment job was skipped. After the test,
+I restored the correct Terraform formatting.
