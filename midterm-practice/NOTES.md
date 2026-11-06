@@ -2,8 +2,4 @@
 
 ## Task 5: git hygiene
 
-<!-- Replace this line with one sentence explaining why deleting the .tfstate
-     file and the credential string in your latest commit is not sufficient
-     by itself. -->
-
-TODO
+Deleting the Terraform state file and exposed credentials from the latest commit is not enough because they remain accessible in earlier Git commits, so the affected credentials must be rotated or revoked and sensitive information removed from Git history.
