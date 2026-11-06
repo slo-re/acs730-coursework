@@ -168,9 +168,9 @@ resource "aws_route_table" "public" {
 }
 
 resource "aws_route_table_association" "public" {
-  for_each = var.public_subnets
+  for_each = aws_subnet.public
 
-  subnet_id      = aws_subnet.public.id
+  subnet_id      = each.value.id
   route_table_id = aws_route_table.public.id
 }
 
@@ -180,7 +180,7 @@ resource "aws_security_group" "web" {
   vpc_id      = aws_vpc.main.id
 
   dynamic "ingress" {
-    for_each = var.ingress_port
+    for_each = var.ingress_ports
 
     content {
       description = "Inbound TCP ${ingress.value}"
