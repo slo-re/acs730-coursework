@@ -29,7 +29,35 @@ I started with two replicas and scaled the Deployment to four. Kubernetes create
 - week09-scaling.txt
 
 ## Experiments
-Two experiment write-ups are required across Week 9 and Week 10. The remaining experiment observations will be documented before final submission.
+
+### Experiment 1 - Pod Recovery
+
+**Prediction:** Having two replicas should provide better availability
+because another pod can continue serving traffic while one is replaced.
+
+**What I did:** I deleted a pod while running two replicas, then repeated
+the test with one replica. I checked the health endpoint 20 times during
+each test.
+
+**Observation:** With two replicas, 1 failed requests out of 20. With one replica, 4 failed requests out of 20.
+Kubernetes automatically replaced the deleted pods. This demonstrated
+that a Deployment maintains its requested replica count, but a single
+replica provides no redundancy if that pod becomes unavailable.
+I restored the Deployment to two replicas.
+
+### Experiment 2 - ConfigMap Changes
+
+**Prediction:** Updating a ConfigMap will not automatically change
+environment variables inside containers that are already running.
+
+**What I did:** I changed LOG_LEVEL to debug, inspected the running
+container, restarted the Deployment, and checked again.
+
+**Observation:** Initially LOG_LEVEL was `info`. Without restarting,
+the container still showed `info`. After restarting the Deployment,
+it showed `debug`. This demonstrated that ConfigMap-backed environment
+variables are loaded when a container starts, not continuously updated.
+I restored the original configuration afterward.
 
 ## Week 10 - CI/CD
 To be completed in Part 2 of Lab 7.
