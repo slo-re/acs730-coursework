@@ -1,0 +1,15 @@
+
+PLAY [Test command idempotency] ************************************************
+
+TASK [Unguarded shell command] *************************************************
+changed: [i-01320b158f3aba501]
+changed: [i-0bc64822d5703446a]
+
+TASK [Guarded command] *********************************************************
+changed: [i-01320b158f3aba501]
+changed: [i-0bc64822d5703446a]
+
+PLAY RECAP *********************************************************************
+i-01320b158f3aba501        : ok=2    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+i-0bc64822d5703446a        : ok=2    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+

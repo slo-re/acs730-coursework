@@ -7,3 +7,4 @@ credentials
 *.tfstate.*
 tfplan
 crash.log
+packer-manifest.json

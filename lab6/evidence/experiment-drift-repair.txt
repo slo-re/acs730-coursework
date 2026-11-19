@@ -1,0 +1,35 @@
+
+PLAY [Configure the ACS730 Lab 6 web servers] **********************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [i-01320b158f3aba501]
+ok: [i-0bc64822d5703446a]
+
+TASK [webserver : Install the packages the application needs] ******************
+ok: [i-01320b158f3aba501]
+ok: [i-0bc64822d5703446a]
+
+TASK [webserver : Create the unprivileged service account] *********************
+ok: [i-01320b158f3aba501]
+ok: [i-0bc64822d5703446a]
+
+TASK [webserver : Create the application directory] ****************************
+ok: [i-01320b158f3aba501]
+ok: [i-0bc64822d5703446a]
+
+TASK [webserver : Render the landing page from a template] *********************
+ok: [i-01320b158f3aba501]
+changed: [i-0bc64822d5703446a]
+
+TASK [webserver : Install the systemd unit from a template] ********************
+ok: [i-01320b158f3aba501]
+ok: [i-0bc64822d5703446a]
+
+TASK [webserver : Enable the service and make sure it is running] **************
+ok: [i-0bc64822d5703446a]
+ok: [i-01320b158f3aba501]
+
+PLAY RECAP *********************************************************************
+i-01320b158f3aba501        : ok=7    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+i-0bc64822d5703446a        : ok=7    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
