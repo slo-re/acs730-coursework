@@ -1,0 +1,90 @@
+name: lab6-configure
+
+on:
+  push:
+    paths:
+      - 'lab6/**'
+      - '.github/workflows/lab6-configure.yml'
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Create or update infrastructure"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  TF_IN_AUTOMATION: "true"
+
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: lab6/terraform
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Ansible and AWS collections
+        run: |
+          python3 -m pip install --quiet "ansible-core>=2.16" boto3 botocore
+          ansible-galaxy collection install amazon.aws community.aws
+
+      - name: Install SSM Session Manager plugin
+        run: |
+          curl -sSfL -o /tmp/ssm.deb \
+            https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb
+          sudo dpkg -i /tmp/ssm.deb
+          session-manager-plugin --version
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.10.3
+          terraform_wrapper: false
+
+      - name: terraform init
+        run: |
+          ACCT=$(aws sts get-caller-identity --query Account --output text)
+          terraform init -input=false \
+            -backend-config="bucket=acs730-lab6-ssm-${ACCT}"
+
+      - name: terraform plan
+        run: terraform plan -input=false
+
+      - name: terraform apply
+        if: inputs.apply
+        run: terraform apply -input=false -auto-approve
+
+      - name: Converge the instances with Ansible
+        if: inputs.apply
+        working-directory: lab6/ansible
+        run: |
+          HOSTS=$(ansible-inventory -i inventory/ --list |
+            python3 -c 'import sys,json; d=json.load(sys.stdin); print(len(d.get("role_web",{}).get("hosts",[])))')
+          test "$HOSTS" -eq 2
+
+          READY=0
+          for i in $(seq 1 45); do
+            if ansible -i inventory/ role_web -m ansible.builtin.ping; then
+              READY=1
+              break
+            fi
+            echo "Waiting for SSM ($i/45)"
+            sleep 10
+          done
+
+          test "$READY" -eq 1
+          ansible-playbook -i inventory/ site.yml -l role_web
