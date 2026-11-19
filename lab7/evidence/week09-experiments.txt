@@ -1,0 +1,13 @@
+Experiment 1 - Pod Recovery
+Prediction: Two replicas should provide better availability than one.
+2 replicas: 1 failed requests out of 20.
+1 replica: 4 failed requests out of 20.
+All pods were replaced and the deployment returned to 2 replicas.
+
+Experiment 2 - ConfigMap
+Prediction: Existing containers will not automatically receive changed
+environment variables until they restart.
+Before: info
+After changing ConfigMap without restart: info
+After restarting deployment: debug
+Original configuration restored afterward.

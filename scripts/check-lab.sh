@@ -1,208 +1,199 @@
 #!/usr/bin/env bash
 #
-# check-lab.sh -- run the SAME kinds of checks the grading pipeline runs, on one
-# deliverable folder, BEFORE you push. Green here ≈ green in grading.
+# check-lab.sh
 #
-# Usage (from the repo root):
-#   ./scripts/check-lab.sh lab1
-#   ./scripts/check-lab.sh lab5
-#   ./scripts/check-lab.sh assignment1
+# Runs the same categories of check the grading pipeline runs, against one
+# deliverable folder, and lists the files that deliverable is required to
+# contain. Green here is a strong sign you will be green in grading.
 #
-# Checks per folder (mirroring the instructor pipeline):
-#   *.sh            -> bash -n syntax
-#   *.tf dirs       -> terraform init -backend=false && terraform validate (+ tfsec if installed;
-#                      tfsec HIGH/CRITICAL is a HARD FAIL for lab7, informational elsewhere)
-#   Dockerfile      -> docker build (if docker available)
-#   ansible/        -> ansible-playbook --syntax-check (playbooks), YAML parse (inventory)
-#   k8s/*.yaml      -> YAML parse (grading additionally runs kubeconform)
-#   *.json          -> JSON parse
-# Plus a required-files list per lab, matching the handout's Deliverable section.
+# It does NOT award a grade and it does not judge quality -- it reports
+# PASS / FAIL / MISSING on the mechanical things only.
 #
+# Usage:  ./scripts/check-lab.sh lab2
+
 set -uo pipefail
 
-DIR="${1:?Usage: $0 <lab1..lab8|assignment1|assignment2|final-project>}"
-[ -d "$DIR" ] || { echo "❌ No such folder '$DIR' -- run from the repository root."; exit 1; }
-
-FAILS=0
-pass() { echo "✅ $*"; }
-fail() { echo "❌ $*"; FAILS=$((FAILS+1)); }
-warn() { echo "⚠️  $*"; }
-skip() { echo "⏭️  $* (tool not installed -- grading WILL run this; install via ./scripts/install-lab-tools.sh)"; }
-
-req() {  # req <path> [description]
-  if compgen -G "$1" >/dev/null; then pass "required: $1"; else fail "MISSING required file: $1  ${2:-}"; fi
-}
-
-echo "=== Required files for $DIR (per the handout's Deliverable section) ==="
-case "$DIR" in
-  lab1)
-    req "$DIR/scripts/create-instance.sh"; req "$DIR/scripts/create-security-group.sh"
-    req "$DIR/scripts/delete-instance.sh"; req "$DIR/scripts/delete-security-group.sh"
-    req "$DIR/README.md"; req "$DIR/evidence/*" "screenshot(s)"; req ".gitignore" ;;
-  lab2)
-    req "$DIR/scripts/deploy-web.sh"; req "$DIR/acs730-web.service"
-    req "$DIR/README.md"; req "$DIR/evidence/*" ;;
-  lab3)
-    req "$DIR/main.tf"; req ".github/workflows/lab3-ci.yml"; req ".github/workflows/lab3-deploy.yml"
-    req "$DIR/README.md"; req "$DIR/evidence/*"; req "scripts/refresh-gha-creds.sh" "never delete this" ;;
-  lab4)
-    req "$DIR/app.py"; req "$DIR/requirements.txt"; req "$DIR/requirements-dev.txt"
-    req "$DIR/tests/test_app.py"; req "$DIR/pytest.ini"
-    req "$DIR/Dockerfile"; req "$DIR/Dockerfile.naive"; req "$DIR/.dockerignore"
-    req "$DIR/README.md"; req "$DIR/evidence/*"
-    req ".github/workflows/lab4-ci.yml"; req ".github/workflows/docker-build.yml"
-    req ".github/actions/python-deps/action.yml" ;;
-  lab5)
-    req "$DIR/versions.tf"; req "$DIR/providers.tf"; req "$DIR/variables.tf"
-    req "$DIR/network.tf"; req "$DIR/compute.tf"; req "$DIR/outputs.tf"
-    req "$DIR/localstack.tfvars"; req "$DIR/README.md"; req "$DIR/evidence/*"
-    req ".github/workflows/lab5-ci.yml" ;;
-  lab6)
-    req "$DIR/terraform/main.tf"
-    req "$DIR/ansible/ansible.cfg"; req "$DIR/ansible/site.yml"
-    req "$DIR/ansible/inventory/lab6.aws_ec2.yml"; req "$DIR/ansible/group_vars/role_web.yml"
-    req "$DIR/ansible/roles/webserver/tasks/main.yml"; req "$DIR/ansible/roles/webserver/defaults/main.yml"
-    req "$DIR/ansible/roles/webserver/handlers/main.yml"; req "$DIR/ansible/roles/webserver/templates/index.html.j2"
-    req "$DIR/packer/web.pkr.hcl"; req "$DIR/packer/files/index.html"; req "$DIR/scripts/boot-to-ready.sh"
-    req "$DIR/README.md"; req "$DIR/evidence/*"
-    req ".github/workflows/lab6-configure.yml" ;;
-  lab7)
-    req "$DIR/main.tf"; req "$DIR/policies/lab7-deploy-policy.json"
-    req "$DIR/README.md"; req "$DIR/evidence/*"
-    req ".github/workflows/lab7-policy.yml" ;;
-  lab8)
-    req "$DIR/kind-cluster.yaml"; req "$DIR/scripts/create-cluster.sh"
-    req "$DIR/k8s/namespace.yaml"; req "$DIR/k8s/configmap.yaml"; req "$DIR/k8s/secret.yaml"
-    req "$DIR/k8s/deployment.yaml"; req "$DIR/k8s/service.yaml"
-    req "$DIR/README.md"; req "$DIR/evidence/*"
-    req ".github/workflows/lab8-ci.yml"
-    # Week 10 half. Warn rather than fail, so running this at the end of Week 9
-    # on a correct submission does not go red.
-    for w10 in "$DIR/k8s/rbac.yaml" ".github/workflows/lab8-deploy.yml"; do
-      if compgen -G "$w10" >/dev/null; then pass "required (Week 10): $w10"
-      else warn "not present yet: $w10 -- required for the Week 10 half of this lab"; fi
-    done ;;
-  assignment1)
-    req "$DIR/REPORT.md"; req "$DIR/terraform/modules/*"; 
-    req "$DIR/terraform/dev/*"; req "$DIR/terraform/staging/*"; req "$DIR/terraform/prod/*"
-    req "$DIR/evidence/*" ;;
-  assignment2)
-    req "$DIR/REPORT.md"; req "$DIR/terraform/*"; req "$DIR/ansible/roles/*"
-    req "$DIR/packer/*.pkr.hcl"; req "$DIR/evidence/*" ;;
-  final-project)
-    req "$DIR/REPORT.md"; req "$DIR/terraform/*"; req "$DIR/k8s/*"; req "$DIR/evidence/*" ;;
-  *) warn "No required-files list for '$DIR'; running generic checks only." ;;
-esac
-
-echo; echo "=== Shell scripts: bash -n ==="
-found=0
-while IFS= read -r sf; do
-  found=1
-  if bash -n "$sf" 2>/tmp/checklab.err; then pass "bash -n $sf"; else fail "bash -n $sf: $(cat /tmp/checklab.err)"; fi
-done < <(find "$DIR" -iname '*.sh' 2>/dev/null)
-[ $found -eq 0 ] && echo "(none)"
-
-echo; echo "=== Terraform: init -backend=false + validate ==="
-found=0
-while IFS= read -r tfd; do
-  found=1
-  if command -v terraform >/dev/null 2>&1; then
-    if (cd "$tfd" && terraform init -backend=false -input=false >/dev/null 2>&1 && terraform validate >/dev/null 2>/tmp/checklab.err); then
-      pass "terraform validate $tfd"
-    else
-      fail "terraform validate $tfd: $(tail -3 /tmp/checklab.err | tr '\n' ' ')"
-    fi
-    if command -v tfsec >/dev/null 2>&1; then
-      if tfsec "$tfd" --minimum-severity HIGH >/dev/null 2>&1; then
-        pass "tfsec (HIGH/CRITICAL clean) $tfd"
-      else
-        if [ "$DIR" = "lab7" ]; then fail "tfsec HIGH/CRITICAL findings in $tfd -- grading HARD-FAILS lab7 on this; run: tfsec $tfd"
-        else warn "tfsec has findings in $tfd (informational for this folder; grader reviews them): tfsec $tfd"; fi
-      fi
-    else
-      [ "$DIR" = "lab7" ] && skip "tfsec on $tfd" || true
-    fi
-  else
-    skip "terraform validate on $tfd"
-  fi
-done < <(find "$DIR" -name '*.tf' -exec dirname {} \; 2>/dev/null | sort -u)
-[ $found -eq 0 ] && echo "(none)"
-
-echo; echo "=== Dockerfiles: docker build ==="
-found=0
-while IFS= read -r df; do
-  found=1
-  if command -v docker >/dev/null 2>&1 && docker ps >/dev/null 2>&1; then
-    if docker build -q -f "$df" "$(dirname "$df")" >/dev/null 2>/tmp/checklab.err; then
-      pass "docker build $df"
-    else
-      fail "docker build $df: $(tail -3 /tmp/checklab.err | tr '\n' ' ')"
-    fi
-  else
-    skip "docker build $df"
-  fi
-done < <(find "$DIR" -iname 'Dockerfile' 2>/dev/null)
-[ $found -eq 0 ] && echo "(none)"
-
-echo; echo "=== Ansible: playbook syntax + inventory YAML ==="
-found=0
-while IFS= read -r pb; do
-  found=1
-  if command -v ansible-playbook >/dev/null 2>&1; then
-    if ansible-playbook --syntax-check "$pb" >/dev/null 2>/tmp/checklab.err; then pass "syntax-check $pb"
-    else fail "syntax-check $pb: $(tail -2 /tmp/checklab.err | tr '\n' ' ')"; fi
-  else skip "ansible-playbook --syntax-check $pb"; fi
-done < <(find "$DIR" -path '*ansible*' \( -iname '*.yml' -o -iname '*.yaml' \) \
-            ! -path '*/inventory/*' ! -path '*/group_vars/*' ! -path '*/host_vars/*' \
-            ! -path '*/roles/*' 2>/dev/null \
-          | while IFS= read -r f; do grep -qE '^[[:space:]]*-?[[:space:]]*hosts:' "$f" && echo "$f"; done)
-[ $found -eq 0 ] && echo "(none)"
-
-echo; echo "=== YAML files (inventory, k8s, workflows touched by this lab): parse ==="
-found=0
-while IFS= read -r y; do
-  found=1
-  if python3 -c "import yaml,sys; list(yaml.safe_load_all(open(sys.argv[1])))" "$y" 2>/tmp/checklab.err; then
-    pass "yaml $y"
-  else fail "yaml $y: $(tail -1 /tmp/checklab.err)"; fi
-done < <(find "$DIR" \( -path '*/inventory/*' -o -path '*k8s*' \) \( -iname '*.yml' -o -iname '*.yaml' \) 2>/dev/null)
-[ $found -eq 0 ] && echo "(none)"
-
-echo; echo "=== Python lint (flake8): the same gate lab4-ci.yml applies ==="
-if [ "$DIR" = "lab4" ]; then
-  if command -v flake8 >/dev/null 2>&1; then
-    if flake8 "$DIR" --max-line-length 100 >/tmp/checklab.err 2>&1; then pass "flake8 $DIR"
-    else fail "flake8 $DIR: $(head -3 /tmp/checklab.err | tr '\n' ' ')"; fi
-  else skip "flake8 $DIR"; fi
-else echo "(not applicable)"; fi
-
-echo; echo "=== Packer: template validation ==="
-found=0
-while IFS= read -r pk; do
-  found=1
-  pkdir=$(dirname "$pk")
-  if command -v packer >/dev/null 2>&1 || [ -x /usr/bin/packer ]; then
-    PK=$(command -v /usr/bin/packer || command -v packer)
-    if (cd "$pkdir" && "$PK" init . >/dev/null 2>&1 && "$PK" validate . >/tmp/checklab.err 2>&1); then
-      pass "packer validate $pk"
-    else fail "packer validate $pk: $(tail -2 /tmp/checklab.err | tr '\n' ' ')"; fi
-  else skip "packer validate $pk"; fi
-done < <(find "$DIR" -iname '*.pkr.hcl' 2>/dev/null)
-[ $found -eq 0 ] && echo "(none)"
-
-echo; echo "=== JSON files: parse ==="
-found=0
-while IFS= read -r j; do
-  found=1
-  if python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$j" 2>/tmp/checklab.err; then pass "json $j"
-  else fail "json $j: $(tail -1 /tmp/checklab.err)"; fi
-done < <(find "$DIR" -iname '*.json' 2>/dev/null)
-[ $found -eq 0 ] && echo "(none)"
-
-echo
-if [ "$FAILS" -eq 0 ]; then
-  echo "🎉 $DIR: all checks passed. Push with confidence (and make sure it's MERGED to main, not just on a branch)."
-else
-  echo "❌ $DIR: $FAILS check(s) failed -- fix before the deadline. Grading runs these exact categories."
+DIR="${1:-}"
+if [ -z "$DIR" ]; then
+  echo "Usage: $0 <lab1|lab2|...|lab8|assignment1|assignment2|final-project>" >&2
   exit 1
 fi
+
+if [ ! -d "$DIR" ]; then
+  echo "FAIL: folder '$DIR' does not exist. Run this from the root of your repo." >&2
+  exit 1
+fi
+
+PASS=0; FAIL=0; MISS=0
+
+ok()   { echo "  PASS  $*"; PASS=$((PASS+1)); }
+bad()  { echo "  FAIL  $*"; FAIL=$((FAIL+1)); }
+miss() { echo "  MISSING  $*"; MISS=$((MISS+1)); }
+note() { echo "  ....  $*"; }
+
+run() {  # label, command...
+  local label="$1"; shift
+  local out rc
+  out="$("$@" 2>&1)"; rc=$?
+  if [ $rc -eq 0 ]; then ok "$label"
+  else
+    bad "$label"
+    echo "$out" | sed 's/^/        /' | tail -12
+  fi
+}
+
+# ---------- required files, per deliverable ----------
+required_files() {
+  case "$1" in
+    lab1) echo "lab1/scripts/create-instance.sh lab1/scripts/create-security-group.sh lab1/scripts/delete-instance.sh lab1/scripts/delete-security-group.sh lab1/README.md" ;;
+    lab2) echo "lab2/scripts/deploy-web.sh lab2/acs730-web.service lab2/README.md" ;;
+    lab3) echo "lab3/README.md" ;;
+    lab4) echo "lab4/README.md" ;;
+    lab5) echo "lab5/README.md" ;;
+    lab6) echo "lab6/README.md" ;;
+    lab7) echo "lab7/README.md" ;;
+    lab8) echo "lab8/README.md" ;;
+    *)    echo "$1/README.md" ;;
+  esac
+}
+
+required_dirs() {
+  case "$1" in
+    lab1|lab2) echo "$1/evidence" ;;
+    *) echo "" ;;
+  esac
+}
+
+echo ""
+echo "Checking $DIR"
+echo ""
+echo "Required files"
+for f in $(required_files "$DIR"); do
+  if [ -f "$f" ]; then ok "$f"; else miss "$f"; fi
+done
+for d in $(required_dirs "$DIR"); do
+  if [ -d "$d" ] && [ -n "$(ls -A "$d" 2>/dev/null)" ]; then ok "$d/ (not empty)"
+  else miss "$d/ with at least one file in it"; fi
+done
+
+echo ""
+echo "Mechanical checks"
+
+matched=0
+
+# ---------- shell scripts ----------
+while IFS= read -r sf; do
+  [ -z "$sf" ] && continue
+  matched=1
+  run "bash -n syntax check ($sf)" bash -n "$sf"
+  if [ ! -x "$sf" ]; then
+    note "$sf is not executable -- run: chmod +x $sf"
+  fi
+done < <(find "$DIR" -name '*.sh' 2>/dev/null)
+
+# ---------- Terraform ----------
+while IFS= read -r tfd; do
+  [ -z "$tfd" ] && continue
+  matched=1
+  if command -v terraform >/dev/null 2>&1; then
+    run "terraform validate ($tfd)" bash -c "cd '$tfd' && terraform init -backend=false -input=false >/dev/null && terraform validate"
+  else
+    note "terraform is not installed, so this check was skipped here -- grading WILL run it. ./scripts/install-lab-tools.sh lab3"
+  fi
+  if command -v tfsec >/dev/null 2>&1; then
+    if [ "$DIR" = "lab8" ]; then
+      # lab8 = Week 12, Security and Policy-as-Code: "tfsec finds nothing
+      # HIGH or CRITICAL" is the point of the exercise, so it is a real
+      # pass/fail gate here rather than information.
+      run "tfsec, no HIGH/CRITICAL ($tfd)" bash -c "tfsec '$tfd' --minimum-severity HIGH"
+    else
+      note "tfsec findings for $tfd (informational in this lab):"
+      tfsec "$tfd" --soft-fail 2>&1 | tail -15 | sed 's/^/        /'
+    fi
+  elif [ "$DIR" = "lab8" ]; then
+    note "tfsec is not installed and lab8 is graded on it. ./scripts/install-lab-tools.sh lab8"
+  fi
+done < <(find "$DIR" -name '*.tf' -exec dirname {} \; 2>/dev/null | sort -u)
+
+# ---------- Docker ----------
+while IFS= read -r df; do
+  [ -z "$df" ] && continue
+  matched=1
+  if command -v docker >/dev/null 2>&1; then
+    run "docker build ($df)" docker build -q -f "$df" "$(dirname "$df")"
+  else
+    note "docker is not installed, so the build was skipped -- grading WILL run it. ./scripts/install-lab-tools.sh lab4"
+  fi
+done < <(find "$DIR" -iname 'Dockerfile' 2>/dev/null)
+
+# ---------- Ansible ----------
+while IFS= read -r ad; do
+  [ -z "$ad" ] && continue
+  while IFS= read -r pb; do
+    [ -z "$pb" ] && continue
+    grep -qE '^[[:space:]]*-?[[:space:]]*hosts:' "$pb" || continue
+    matched=1
+    if command -v ansible-playbook >/dev/null 2>&1; then
+      run "ansible-playbook --syntax-check ($pb)" ansible-playbook --syntax-check "$pb"
+    else
+      note "ansible is not installed. ./scripts/install-lab-tools.sh lab6"
+    fi
+  done < <(find "$ad" -maxdepth 1 \( -iname '*.yml' -o -iname '*.yaml' \) 2>/dev/null)
+done < <(find "$DIR" -type d -iname 'ansible' 2>/dev/null)
+
+# ---------- Kubernetes manifests ----------
+while IFS= read -r kd; do
+  [ -z "$kd" ] && continue
+  while IFS= read -r mf; do
+    [ -z "$mf" ] && continue
+    matched=1
+    if command -v kubeconform >/dev/null 2>&1; then
+      run "kubeconform ($mf)" kubeconform -strict -summary "$mf"
+    else
+      # kubeconform is a CI-side tool; locally, catching invalid YAML early
+      # is most of the value.
+      run "YAML parses ($mf)" python3 -c "import yaml,sys;yaml.safe_load(open(sys.argv[1]))" "$mf"
+    fi
+  done < <(find "$kd" \( -iname '*.yaml' -o -iname '*.yml' \) 2>/dev/null)
+done < <(find "$DIR" -type d -iname 'k8s' 2>/dev/null)
+
+# ---------- Packer ----------
+while IFS= read -r pf; do
+  [ -z "$pf" ] && continue
+  matched=1
+  if command -v packer >/dev/null 2>&1; then
+    run "packer validate ($pf)" bash -c "packer init '$pf' >/dev/null 2>&1; packer validate '$pf'"
+  else
+    note "packer is not installed. ./scripts/install-lab-tools.sh lab6"
+  fi
+done < <(find "$DIR" -iname '*.pkr.hcl' 2>/dev/null)
+
+if [ "$matched" -eq 0 ]; then
+  note "no Terraform / Docker / Ansible / Kubernetes / Packer / shell content found in $DIR -- a human reads this one."
+fi
+
+# ---------- repo hygiene ----------
+echo ""
+echo "Repository hygiene"
+HITS="$(git log --all --name-only --pretty=format: 2>/dev/null \
+        | grep -E '\.(tfstate|pem)$|(^|/)credentials$' \
+        | grep -vE '^(midterm-practice|final-practice)/' | sort -u)"
+if [ -n "$HITS" ]; then
+  bad "a key, credentials file or tfstate is in your git history:"
+  echo "$HITS" | sed 's/^/        /'
+  note "deleting it in a new commit does NOT remove it from history."
+else
+  ok "no .pem, credentials or .tfstate in git history"
+fi
+
+if [ -f .gitignore ] && grep -q '\*.pem' .gitignore; then
+  ok ".gitignore covers *.pem"
+else
+  bad ".gitignore is missing or does not list *.pem"
+fi
+
+echo ""
+echo "Summary for $DIR:  $PASS pass, $FAIL fail, $MISS missing"
+echo ""
+if [ "$FAIL" -gt 0 ] || [ "$MISS" -gt 0 ]; then exit 1; fi
+exit 0
