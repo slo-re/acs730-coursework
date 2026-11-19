@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: acs730-lab4
+  namespace: lab7
+  labels:
+    app: acs730-lab4
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: acs730-lab4
+  template:
+    metadata:
+      labels:
+        app: acs730-lab4
+    spec:
+      containers:
+        - name: app
+          image: acs730-lab4:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: acs730-lab4-config
+          env:
+            - name: APP_VERSION
+              value: "v1"
+            - name: APP_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: acs730-lab4-secret
+                  key: APP_TOKEN
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi

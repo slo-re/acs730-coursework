@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: acs730-lab4-config
+  namespace: lab7
+data:
+  APP_ENV: "kind-acs730"
+  APP_GREETING: "ACS730 Lab 7"
+  LOG_LEVEL: "info"
