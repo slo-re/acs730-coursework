@@ -1,0 +1,73 @@
+
+======================================================
+tfsec is joining the Trivy family
+
+tfsec will continue to remain available
+for the time being, although our engineering
+attention will be directed at Trivy going forward.
+
+You can read more here:
+https://github.com/aquasecurity/tfsec/discussions/1994
+======================================================
+
+Result #1 MEDIUM Bucket does not have logging enabled
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  main.tf:11-13
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   11    resource "aws_s3_bucket" "artifacts" {
+   12      bucket = "acs730-lab8-${var.owner}-artifacts"
+   13    }
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+          ID aws-s3-enable-bucket-logging
+      Impact There is no way to determine the access to this bucket
+  Resolution Add a logging block to the resource to enable access logging
+
+  More Information
+  - https://aquasecurity.github.io/tfsec/v1.28.14/checks/aws/s3/enable-bucket-logging/
+  - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+Result #2 MEDIUM Bucket does not have versioning enabled
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  main.tf:11-13
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   11    resource "aws_s3_bucket" "artifacts" {
+   12      bucket = "acs730-lab8-${var.owner}-artifacts"
+   13    }
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+          ID aws-s3-enable-versioning
+      Impact Deleted or modified data would not be recoverable
+  Resolution Enable versioning to protect against accidental/malicious removal or modification
+
+  More Information
+  - https://aquasecurity.github.io/tfsec/v1.28.14/checks/aws/s3/enable-versioning/
+  - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket#versioning
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+  timings
+  ──────────────────────────────────────────
+  disk i/o             61.921µs
+  parsing              1.704207ms
+  adaptation           7.512799ms
+  checks               8.923013ms
+  total                18.20194ms
+
+  counts
+  ──────────────────────────────────────────
+  modules downloaded   0
+  modules processed    1
+  blocks processed     12
+  files read           3
+
+  results
+  ──────────────────────────────────────────
+  passed               16
+  ignored              0
+  critical             0
+  high                 0
+  medium               2
+  low                  0
+
+  16 passed, 2 potential problem(s) detected.

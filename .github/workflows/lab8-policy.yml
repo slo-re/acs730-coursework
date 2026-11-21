@@ -1,0 +1,27 @@
+name: lab8-policy
+
+on:
+  pull_request:
+    paths: ['lab8/**', '.github/workflows/lab8-policy.yml']
+  push:
+    branches: [main]
+    paths: ['lab8/**', '.github/workflows/lab8-policy.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  tfsec:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tfsec 1.28.14
+        run: |
+          curl -sSfL --retry 5 -o /tmp/tfsec \
+            https://github.com/aquasecurity/tfsec/releases/download/v1.28.14/tfsec-linux-amd64
+          sudo install -m 0755 /tmp/tfsec /usr/local/bin/tfsec
+
+      - name: Scan lab8 at HIGH and above
+        run: tfsec lab8 --minimum-severity HIGH --no-color
