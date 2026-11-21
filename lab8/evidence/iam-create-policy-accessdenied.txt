@@ -1,0 +1,29 @@
+{
+    "Policy": {
+        "PolicyName": "acs730-lab8-deploy",
+        "PolicyId": "ANPARBPKEKSKLBPTIPU6P",
+        "Arn": "arn:aws:iam::071894848660:policy/acs730-lab8-deploy",
+        "Path": "/",
+        "DefaultVersionId": "v1",
+        "AttachmentCount": 0,
+        "PermissionsBoundaryUsageCount": 0,
+        "IsAttachable": true,
+        "CreateDate": "2026-11-21T21:59:35+00:00",
+        "UpdateDate": "2026-11-21T21:59:35+00:00"
+    }
+}
+
+AWS CLI exit code: 0
+Sat Nov 21 21:59:35 UTC 2026
+{
+    "UserId": "AROARBPKEKSKCKRUBRWJT:i-0706f5345b44a9e38",
+    "Account": "071894848660",
+    "Arn": "arn:aws:sts::071894848660:assumed-role/LabRole/i-0706f5345b44a9e38"
+}
+
+Unexpected result: IAM policy creation succeeded.
+The active LabRole session permitted iam:CreatePolicy.
+The policy was not attached to any principal.
+Following the alternative cleanup instruction on page 18,
+the policy was deleted successfully.
+Sat Nov 21 22:00:55 UTC 2026
