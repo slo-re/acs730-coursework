@@ -1,0 +1,83 @@
+
+======================================================
+tfsec is joining the Trivy family
+
+tfsec will continue to remain available
+for the time being, although our engineering
+attention will be directed at Trivy going forward.
+
+You can read more here:
+https://github.com/aquasecurity/tfsec/discussions/1994
+======================================================
+
+Result #1 CRITICAL Security group rule allows ingress from public internet.
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  main.tf:54
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   44    resource "aws_security_group" "admin" {
+   ..
+   54  [     cidr_blocks = ["0.0.0.0/0"]
+   ..
+   64    }
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+          ID aws-ec2-no-public-ingress-sgr
+      Impact Your port exposed to the internet
+  Resolution Set a more restrictive cidr range
+
+  More Information
+  - https://aquasecurity.github.io/tfsec/v1.28.14/checks/aws/ec2/no-public-ingress-sgr/
+  - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule#cidr_blocks
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+Result #2 HIGH EBS volume is not encrypted.
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  main.tf:37
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   34    resource "aws_ebs_volume" "scratch" {
+   35      availability_zone = "${var.region}a"
+   36      size              = 1
+   37  [   encrypted         = false (false)
+   38
+   39      tags = {
+   40        Name = "acs730-lab8-scratch"
+   41      }
+   42    }
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+          ID aws-ec2-enable-volume-encryption
+      Impact Unencrypted sensitive data is vulnerable to compromise.
+  Resolution Enable encryption of EBS volumes
+
+  More Information
+  - https://aquasecurity.github.io/tfsec/v1.28.14/checks/aws/ec2/enable-volume-encryption/
+  - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ebs_volume#encrypted
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+  timings
+  ──────────────────────────────────────────
+  disk i/o             39.426µs
+  parsing              699.162µs
+  adaptation           149.92µs
+  checks               8.065915ms
+  total                8.954423ms
+
+  counts
+  ──────────────────────────────────────────
+  modules downloaded   0
+  modules processed    1
+  blocks processed     12
+  files read           3
+
+  results
+  ──────────────────────────────────────────
+  passed               8
+  ignored              8
+  critical             1
+  high                 1
+  medium               0
+  low                  0
+
+  8 passed, 8 ignored, 2 potential problem(s) detected.
+
+exit code: 1

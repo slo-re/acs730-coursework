@@ -8,6 +8,11 @@ resource "aws_kms_key" "artifacts" {
   enable_key_rotation = true
 }
 
+# Accepted risk: this bucket stores regenerable tfsec and gitleaks reports.
+# Versioning would retain additional copies of reports that CI can rebuild.
+# Reconsider this exception if the bucket stores unique or audit-critical data.
+# Author: Stefano Lo Re. Date: 2026-11-21.
+# tfsec:ignore:aws-s3-enable-versioning
 resource "aws_s3_bucket" "artifacts" {
   bucket = "acs730-lab8-${var.owner}-artifacts"
 }

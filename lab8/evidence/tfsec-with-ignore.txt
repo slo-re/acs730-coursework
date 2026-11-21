@@ -1,0 +1,55 @@
+
+======================================================
+tfsec is joining the Trivy family
+
+tfsec will continue to remain available
+for the time being, although our engineering
+attention will be directed at Trivy going forward.
+
+You can read more here:
+https://github.com/aquasecurity/tfsec/discussions/1994
+======================================================
+
+Result #1 MEDIUM Bucket does not have logging enabled
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  main.tf:16-18
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   16    resource "aws_s3_bucket" "artifacts" {
+   17      bucket = "acs730-lab8-${var.owner}-artifacts"
+   18    }
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+          ID aws-s3-enable-bucket-logging
+      Impact There is no way to determine the access to this bucket
+  Resolution Add a logging block to the resource to enable access logging
+
+  More Information
+  - https://aquasecurity.github.io/tfsec/v1.28.14/checks/aws/s3/enable-bucket-logging/
+  - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+  timings
+  ──────────────────────────────────────────
+  disk i/o             40.719µs
+  parsing              1.623482ms
+  adaptation           279.931µs
+  checks               22.426451ms
+  total                24.370583ms
+
+  counts
+  ──────────────────────────────────────────
+  modules downloaded   0
+  modules processed    1
+  blocks processed     12
+  files read           3
+
+  results
+  ──────────────────────────────────────────
+  passed               16
+  ignored              1
+  critical             0
+  high                 0
+  medium               1
+  low                  0
+
+  16 passed, 1 ignored, 1 potential problem(s) detected.
