@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'assignment1/**'
+      - '!assignment1/evidence/**'
+      - '!assignment1/REPORT.md'
       - '.github/workflows/assignment1-deploy.yml'
   workflow_dispatch:
 
