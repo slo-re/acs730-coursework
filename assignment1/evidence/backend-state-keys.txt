@@ -1,0 +1,5 @@
+Backend bucket: acs730-tfstate-071894848660
+PASS: s3://acs730-tfstate-071894848660/assignment1/dev/terraform.tfstate
+PASS: s3://acs730-tfstate-071894848660/assignment1/staging/terraform.tfstate
+PASS: s3://acs730-tfstate-071894848660/assignment1/prod/terraform.tfstate
+PASS: Three distinct Terraform state keys

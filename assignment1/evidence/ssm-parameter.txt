@@ -1,0 +1,6 @@
+Environment: dev
+/acs730/assignment1/dev/app-secret	SecureString	1
+Environment: staging
+/acs730/assignment1/staging/app-secret	SecureString	1
+Environment: prod
+/acs730/assignment1/prod/app-secret	SecureString	1

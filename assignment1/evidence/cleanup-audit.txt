@@ -1,0 +1,42 @@
+
+=== EC2 instances (workstation is expected; anything else should usually be gone) ===
+----------------------------------------------------------------------
+|                          DescribeInstances                         |
++----------------------+-----------+----------+----------------------+
+|  i-0706f5345b44a9e38 |  t3.micro |  running |  acs730-workstation  |
++----------------------+-----------+----------+----------------------+
+
+=== AMIs you own (their snapshots bill continuously) ===
+
+=== EBS snapshots you own ===
+
+=== Unattached EBS volumes (billing while 'available') ===
+
+=== Security groups (default and your workstation's are expected) ===
+---------------------------------------------
+|          DescribeSecurityGroups           |
++-----------------------+-------------------+
+|  sg-0240300f930f0963d |  launch-wizard-1  |
+|  sg-0660799fa638ab1dc |  default          |
+|  sg-043ce33568e5d0734 |  launch-wizard-2  |
++-----------------------+-------------------+
+
+=== Key pairs (vockey is Academy's; others should exist only mid-lab) ===
+---------------------
+| DescribeKeyPairs  |
++-------------------+
+|  acs730-lab2-key  |
+|  vockey           |
+|  acs730-lab2      |
++-------------------+
+
+=== S3 buckets (your tfstate bucket is expected and stays all term) ===
+2026-10-08 23:21:13 acs730-tfstate-071894848660
+
+=== Terraform states that still track resources (destroy before deadline) ===
+✅ /home/ec2-user/acs730-coursework/assignment1/terraform/dev: state empty
+✅ /home/ec2-user/acs730-coursework/assignment1/terraform/prod: state empty
+✅ /home/ec2-user/acs730-coursework/assignment1/terraform/staging: state empty
+✅ /home/ec2-user/acs730-coursework/lab6/terraform: state empty
+
+🎉 Nothing unexpected found. Your workstation stops automatically when the session ends.
