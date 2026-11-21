@@ -34,8 +34,7 @@ resource "aws_s3_bucket_public_access_block" "artifacts" {
 resource "aws_ebs_volume" "scratch" {
   availability_zone = "${var.region}a"
   size              = 1
-  encrypted         = true
-  kms_key_id        = aws_kms_key.artifacts.arn
+  encrypted         = false
 
   tags = {
     Name = "acs730-lab8-scratch"
@@ -48,11 +47,11 @@ resource "aws_security_group" "admin" {
   vpc_id      = data.aws_vpc.default.id
 
   ingress {
-    description = "SSH from one address only"
+    description = "SSH, temporarily open so the TA can get in"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = [var.admin_cidr]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {

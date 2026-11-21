@@ -1,0 +1,1 @@
+{"checks":[{"app_id":15368,"context":"summary"},{"app_id":15368,"context":"tfsec"}],"contexts":["summary","tfsec"],"contexts_url":"https://api.github.com/repos/slo-re/acs730-coursework/branches/main/protection/required_status_checks/contexts","strict":false,"url":"https://api.github.com/repos/slo-re/acs730-coursework/branches/main/protection/required_status_checks"}
