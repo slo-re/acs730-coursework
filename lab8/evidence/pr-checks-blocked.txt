@@ -1,0 +1,11 @@
+terraform	fail	6s	https://github.com/slo-re/acs730-coursework/actions/runs/44953048839/job/136995006160
+tfsec	fail	9s	https://github.com/slo-re/acs730-coursework/actions/runs/44953048807/job/136995005971
+build	pass	22s	https://github.com/slo-re/acs730-coursework/actions/runs/44953048849/job/136995080657
+build	pass	25s	https://github.com/slo-re/acs730-coursework/actions/runs/44953048883/job/136995059771
+image / build	pass	14s	https://github.com/slo-re/acs730-coursework/actions/runs/44953048883/job/136995248879
+lint	pass	14s	https://github.com/slo-re/acs730-coursework/actions/runs/44953048849/job/136995005694
+smoke	pass	12s	https://github.com/slo-re/acs730-coursework/actions/runs/44953048883/job/136995182568
+static-checks	pass	3s	https://github.com/slo-re/acs730-coursework/actions/runs/44953048878/job/136995005882
+summary	pass	3s	https://github.com/slo-re/acs730-coursework/actions/runs/44953048883/job/136995324155
+test (3.11)	pass	8s	https://github.com/slo-re/acs730-coursework/actions/runs/44953048883/job/136995005814
+test (3.12)	pass	9s	https://github.com/slo-re/acs730-coursework/actions/runs/44953048883/job/136995005932
