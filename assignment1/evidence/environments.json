@@ -1,0 +1,77 @@
+{
+  "environments": [
+    {
+      "id": 28108320275,
+      "node_id": "EN_kwDOUfekts8AAAAGi2LuEw",
+      "name": "prod",
+      "url": "https://api.github.com/repos/slo-re/acs730-coursework/environments/prod",
+      "html_url": "https://github.com/slo-re/acs730-coursework/deployments/activity_log?environments_filter=prod",
+      "created_at": "2026-11-21T19:23:38Z",
+      "updated_at": "2026-11-21T19:23:38Z",
+      "can_admins_bypass": true,
+      "protection_rules": [
+        {
+          "id": 73425956,
+          "node_id": "GA_kwDOUfekts4EYGQk",
+          "type": "required_reviewers",
+          "prevent_self_review": false,
+          "reviewers": [
+            {
+              "type": "User",
+              "reviewer": {
+                "login": "slo-re",
+                "id": 330644865,
+                "node_id": "U_kgDOE7U9gQ",
+                "avatar_url": "https://avatars.githubusercontent.com/u/330644865?v=4",
+                "gravatar_id": "",
+                "url": "https://api.github.com/users/slo-re",
+                "html_url": "https://github.com/slo-re",
+                "followers_url": "https://api.github.com/users/slo-re/followers",
+                "following_url": "https://api.github.com/users/slo-re/following{/other_user}",
+                "gists_url": "https://api.github.com/users/slo-re/gists{/gist_id}",
+                "starred_url": "https://api.github.com/users/slo-re/starred{/owner}{/repo}",
+                "subscriptions_url": "https://api.github.com/users/slo-re/subscriptions",
+                "organizations_url": "https://api.github.com/users/slo-re/orgs",
+                "repos_url": "https://api.github.com/users/slo-re/repos",
+                "events_url": "https://api.github.com/users/slo-re/events{/privacy}",
+                "received_events_url": "https://api.github.com/users/slo-re/received_events",
+                "type": "User",
+                "user_view_type": "public",
+                "site_admin": false
+              }
+            }
+          ]
+        },
+        {
+          "id": 73425957,
+          "node_id": "GA_kwDOUfekts4EYGQl",
+          "type": "branch_policy"
+        }
+      ],
+      "deployment_branch_policy": {
+        "protected_branches": false,
+        "custom_branch_policies": true
+      }
+    },
+    {
+      "id": 28108319578,
+      "node_id": "EN_kwDOUfekts8AAAAGi2LrWg",
+      "name": "staging",
+      "url": "https://api.github.com/repos/slo-re/acs730-coursework/environments/staging",
+      "html_url": "https://github.com/slo-re/acs730-coursework/deployments/activity_log?environments_filter=staging",
+      "created_at": "2026-11-21T19:23:38Z",
+      "updated_at": "2026-11-21T19:23:38Z",
+      "can_admins_bypass": true,
+      "protection_rules": [],
+      "deployment_branch_policy": null
+    }
+  ],
+  "prod_deployment_branch_policies": [
+    {
+      "id": 67705158,
+      "node_id": "MDE2OkdhdGVCcmFuY2hQb2xpY3k2NzcwNTE1OA==",
+      "name": "main",
+      "type": "branch"
+    }
+  ]
+}
