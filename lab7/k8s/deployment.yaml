@@ -34,7 +34,7 @@ spec:
                   key: APP_TOKEN
           readinessProbe:
             httpGet:
-              path: /healthz
+              path: /not-a-real-path
               port: 8000
             initialDelaySeconds: 2
             periodSeconds: 5
