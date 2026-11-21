@@ -1,0 +1,65 @@
+name: lab7-deploy
+
+# Push to main ONLY. Never pull_request.
+# This runs code on my self-hosted EC2 workstation.
+# Allowing fork pull requests would expose the workstation.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'lab4/**'
+      - 'lab7/**'
+      - '.github/workflows/lab7-deploy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lab7-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    env:
+      CLUSTER: acs730
+      NS: lab7
+      DEPLOYMENT: acs730-lab4
+      KUBECONFIG: /home/ec2-user/.kube/lab7-deployer.conf
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute an image tag from the commit
+        id: meta
+        run: echo "tag=sha-${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
+
+      - name: Build the image
+        run: docker build -t "acs730-lab4:${{ steps.meta.outputs.tag }}" lab4/
+
+      - name: Load the image into the kind cluster
+        run: kind load docker-image "acs730-lab4:${{ steps.meta.outputs.tag }}" --name "$CLUSTER"
+
+      - name: Apply the manifests
+        run: |
+          kubectl apply -n "$NS" \
+            -f lab7/k8s/configmap.yaml \
+            -f lab7/k8s/deployment.yaml \
+            -f lab7/k8s/service.yaml
+
+      - name: Point the Deployment at this build
+        run: kubectl -n "$NS" set image "deployment/$DEPLOYMENT" app="acs730-lab4:${{ steps.meta.outputs.tag }}"
+
+      - name: Wait for the rollout, and fail the job if it does not finish
+        run: kubectl -n "$NS" rollout status "deployment/$DEPLOYMENT" --timeout=120s
+
+      - name: Smoke test through the Service
+        run: curl -fsS --retry 5 --retry-delay 2 http://localhost:30080/healthz
+
+      - name: What is running now
+        if: always()
+        run: |
+          kubectl -n "$NS" get deployment,pods -o wide
+          kubectl -n "$NS" rollout history "deployment/$DEPLOYMENT" | tail -5
