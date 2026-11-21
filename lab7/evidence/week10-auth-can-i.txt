@@ -1,0 +1,10 @@
+namespace/lab7 unchanged
+serviceaccount/lab7-deployer unchanged
+role.rbac.authorization.k8s.io/lab7-deployer unchanged
+rolebinding.rbac.authorization.k8s.io/lab7-deployer unchanged
+Limited-access Kubernetes permissions:
+Patch deployments: yes
+Delete deployments: no
+Read secrets: no
+Create namespaces: no
+Delete nodes: no

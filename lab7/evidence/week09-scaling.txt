@@ -1,0 +1,19 @@
+=== before ===
+NAME          READY   UP-TO-DATE   AVAILABLE   AGE
+acs730-lab4   2/2     2            2           3s
+NAME                           READY   STATUS    RESTARTS   AGE
+acs730-lab4-567567b696-99xc8   1/1     Running   0          3s
+acs730-lab4-567567b696-hq59m   1/1     Running   0          3s
+=== scaling to 4 ===
+deployment.apps/acs730-lab4 scaled
+Waiting for deployment "acs730-lab4" rollout to finish: 2 of 4 updated replicas are available...
+Waiting for deployment "acs730-lab4" rollout to finish: 3 of 4 updated replicas are available...
+deployment "acs730-lab4" successfully rolled out
+=== after ===
+NAME          READY   UP-TO-DATE   AVAILABLE   AGE
+acs730-lab4   4/4     4            4           7s
+NAME                           READY   STATUS    RESTARTS   AGE   IP           NODE                   NOMINATED NODE   READINESS GATES
+acs730-lab4-567567b696-99xc8   1/1     Running   0          7s    10.244.0.5   acs730-control-plane   <none>           <none>
+acs730-lab4-567567b696-f4mrj   1/1     Running   0          3s    10.244.0.8   acs730-control-plane   <none>           <none>
+acs730-lab4-567567b696-hq59m   1/1     Running   0          7s    10.244.0.6   acs730-control-plane   <none>           <none>
+acs730-lab4-567567b696-w8csb   1/1     Running   0          3s    10.244.0.7   acs730-control-plane   <none>           <none>
