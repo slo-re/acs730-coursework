@@ -1,0 +1,118 @@
+name: assignment1-deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'assignment1/**'
+      - '!assignment1/evidence/**'
+      - '!assignment1/REPORT.md'
+      - '.github/workflows/assignment1-deploy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: assignment1-deploy
+  cancel-in-progress: false
+
+jobs:
+  staging:
+    name: Deploy staging automatically
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure staging AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.10.3
+          terraform_wrapper: false
+
+      - name: Terraform init and validate staging
+        run: |
+          ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
+          terraform -chdir=assignment1/terraform/staging init \
+            -input=false \
+            -backend-config="bucket=acs730-tfstate-${ACCOUNT}"
+          terraform -chdir=assignment1/terraform/staging validate
+
+      - name: Terraform plan staging
+        run: |
+          terraform -chdir=assignment1/terraform/staging plan \
+            -input=false -no-color
+
+      - name: Terraform apply staging
+        run: |
+          set -euo pipefail
+          terraform -chdir=assignment1/terraform/staging apply \
+            -input=false -auto-approve -no-color \
+            2>&1 | tee staging-apply.txt
+
+      - name: Upload staging evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: assignment1-staging-apply
+          path: staging-apply.txt
+          if-no-files-found: warn
+
+  prod:
+    name: Deploy production after approval
+    needs: staging
+    runs-on: ubuntu-latest
+    environment: prod
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure production AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.10.3
+          terraform_wrapper: false
+
+      - name: Terraform init and validate production
+        run: |
+          ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
+          terraform -chdir=assignment1/terraform/prod init \
+            -input=false \
+            -backend-config="bucket=acs730-tfstate-${ACCOUNT}"
+          terraform -chdir=assignment1/terraform/prod validate
+
+      - name: Terraform plan production
+        run: |
+          terraform -chdir=assignment1/terraform/prod plan \
+            -input=false -no-color
+
+      - name: Terraform apply production
+        run: |
+          set -euo pipefail
+          terraform -chdir=assignment1/terraform/prod apply \
+            -input=false -auto-approve -no-color \
+            2>&1 | tee prod-apply.txt
+
+      - name: Upload production evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: assignment1-prod-apply
+          path: prod-apply.txt
+          if-no-files-found: warn

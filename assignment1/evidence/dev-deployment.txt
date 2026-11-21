@@ -1,0 +1,12 @@
+Environment: dev
+AWS Region: us-east-1
+Backend bucket: acs730-tfstate-071894848660
+cpu_alarm_name = "acs730-a1-dev-slo-re-cpu-high"
+ssm_parameter_name = "/acs730/assignment1/dev/app-secret"
+ssm_parameter_version = 1
+vpc_id = "vpc-062dc48e215b751d2"
+web_public_ip = "54.146.137.135"
+web_url = "http://54.146.137.135/"
+
+SSM SecureString metadata (value not displayed):
+/acs730/assignment1/dev/app-secret	SecureString	1
