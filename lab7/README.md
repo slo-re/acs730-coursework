@@ -61,3 +61,45 @@ I restored the original configuration afterward.
 
 ## Week 10 - CI/CD
 To be completed in Part 2 of Lab 7.
+
+
+## Week 10 - CI/CD to Kubernetes
+
+### Why GitHub-hosted runners cannot reach the cluster
+
+The kind Kubernetes cluster runs locally through Docker on my EC2 workstation. Its API server is not publicly accessible, so a GitHub-hosted runner cannot connect to it. This is a networking limitation rather than an authentication problem. A token would not solve it. My Lab 7 CI workflow can use ubuntu-latest because it only validates files, but the deployment workflow needs the self-hosted runner on the workstation.
+
+### Self-hosted runner security and residual risk
+
+A self-hosted runner executes workflow commands on my workstation. If I allowed pull requests from forks to trigger deployment, an external contributor could potentially execute code on the workstation and access its AWS instance role and local resources.
+
+I limited deployment triggers to pushes to main, with no pull_request trigger. I also used a namespace-scoped Kubernetes ServiceAccount instead of giving the deployment workflow cluster-admin access. Fork pull request approval is an additional repository-level protection. At the end of this lab, I remove the runner registration and service.
+
+**Residual risk:** Anyone able to push malicious workflow code to main, including someone who compromises my GitHub account, could still execute commands as ec2-user on the workstation. That account has Docker access and an AWS instance profile. A separate disposable runner would reduce the impact.
+
+### Kubernetes ServiceAccount permissions
+
+The deployment account can patch Deployments but cannot delete Deployments, read Secrets, create namespaces or delete nodes. The authorization tests returned yes, no, no, no and no in that order.
+
+The account can update ConfigMaps because application configuration changes during deployment. It cannot read Secrets because the pipeline should not need access to stored credentials. The application can still receive APP_TOKEN because Kubernetes resolves the Secret reference for the pod.
+
+### Deployment rollout gate
+
+The workflow builds the Docker image, loads it into kind, applies the manifests and updates the Deployment image to a tag based on the Git commit. Then kubectl rollout status runs as a separate step.
+
+This matters because kubectl set image can succeed before any new pod becomes healthy. Without the rollout status step, the pipeline could incorrectly report success even if the new deployment never became ready.
+
+### Failed rollout and recovery
+
+I deliberately changed the readiness probe from /healthz to /not-a-real-path. The new pods could start but did not become ready. GitHub Actions failed specifically at the rollout verification step after waiting for the deployment.
+
+I used kubectl rollout undo through the restricted ServiceAccount to restore the previous healthy revision. The readiness probe returned to /healthz, and the application continued responding. I also committed the corrected manifest to GitHub because rolling back the cluster does not fix the version stored in the repository. The recovery workflow completed successfully.
+
+### Week 10 evidence
+
+- Successful workflow: 44936733589
+- Intentionally failed rollout: 44936534069
+- Rollout failure logs: week10-deploy-red.txt
+- Rollback evidence: week10-rollout-undo.txt
+
+The two experiments completed in Week 9 remain documented earlier in this README.

@@ -1,0 +1,21 @@
+=== Rollout history after rollback ===
+deployment.apps/acs730-lab4
+REVISION  CHANGE-CAUSE
+1         <none>
+2         <none>
+4         <none>
+5         <none>
+7         <none>
+8         <none>
+9         <none>
+
+=== Deployment after undo ===
+NAME          READY   UP-TO-DATE   AVAILABLE   AGE
+acs730-lab4   2/2     2            2           2d15h
+=== Pods ===
+NAME                           READY   STATUS        RESTARTS   AGE
+acs730-lab4-55cf558b87-7zpgr   0/1     Terminating   0          2m7s
+acs730-lab4-65df4655bb-t2rfn   1/1     Running       0          5m35s
+acs730-lab4-65df4655bb-wg9fv   1/1     Running       0          5m40s
+=== Restored readiness probe ===
+/healthz

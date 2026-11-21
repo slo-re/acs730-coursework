@@ -1,0 +1,13 @@
+deploy	Wait for the rollout, and fail the job if it does not finish	﻿2026-11-21T18:37:25.7893860Z ##[group]Run kubectl -n "$NS" rollout status "deployment/$DEPLOYMENT" --timeout=120s
+deploy	Wait for the rollout, and fail the job if it does not finish	2026-11-21T18:37:25.7901876Z ^[[36;1mkubectl -n "$NS" rollout status "deployment/$DEPLOYMENT" --timeout=120s^[[0m
+deploy	Wait for the rollout, and fail the job if it does not finish	2026-11-21T18:37:25.7909552Z shell: /usr/bin/bash -e {0}
+deploy	Wait for the rollout, and fail the job if it does not finish	2026-11-21T18:37:25.7911321Z env:
+deploy	Wait for the rollout, and fail the job if it does not finish	2026-11-21T18:37:25.7912799Z   CLUSTER: acs730
+deploy	Wait for the rollout, and fail the job if it does not finish	2026-11-21T18:37:25.7914356Z   NS: lab7
+deploy	Wait for the rollout, and fail the job if it does not finish	2026-11-21T18:37:25.7915796Z   DEPLOYMENT: acs730-lab4
+deploy	Wait for the rollout, and fail the job if it does not finish	2026-11-21T18:37:25.7919714Z   KUBECONFIG: /home/ec2-user/.kube/lab7-deployer.conf
+deploy	Wait for the rollout, and fail the job if it does not finish	2026-11-21T18:37:25.7923261Z ##[endgroup]
+deploy	Wait for the rollout, and fail the job if it does not finish	2026-11-21T18:37:26.0524773Z Waiting for deployment "acs730-lab4" rollout to finish: 0 out of 2 new replicas have been updated...
+deploy	Wait for the rollout, and fail the job if it does not finish	2026-11-21T18:37:26.0780966Z Waiting for deployment "acs730-lab4" rollout to finish: 1 out of 2 new replicas have been updated...
+deploy	Wait for the rollout, and fail the job if it does not finish	2026-11-21T18:39:26.0377848Z error: timed out waiting for the condition
+deploy	Wait for the rollout, and fail the job if it does not finish	2026-11-21T18:39:26.0427296Z ##[error]Process completed with exit code 1.
