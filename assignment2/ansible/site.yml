@@ -1,0 +1,7 @@
+---
+- name: Configure the ACS730 Assignment 2 web servers
+  hosts: all
+  become: true
+
+  roles:
+    - webserver

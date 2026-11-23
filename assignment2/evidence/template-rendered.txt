@@ -1,0 +1,13 @@
+i-04b8607654d918b9c | CHANGED | rc=0 >>
+<!doctype html>
+<html>
+  <head><title>ACS730 Assignment 2</title></head>
+  <body>
+    <h1>ACS730 Assignment 2</h1>
+    <p>Host name: ip-172-31-21-3</p>
+    <p>Private IP: 172.31.21.3</p>
+    <p>Distribution: Amazon 2023</p>
+    <p>Served by: acs730web on port 80</p>
+    <p>Build: ansible-converge</p>
+  </body>
+</html>
