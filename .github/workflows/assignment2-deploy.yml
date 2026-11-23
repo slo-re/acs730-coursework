@@ -1,0 +1,114 @@
+name: assignment2-deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'assignment2/**'
+      - '!assignment2/evidence/**'
+      - '!assignment2/REPORT.md'
+      - '!assignment2/packer/**'
+      - '.github/workflows/assignment2-deploy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: assignment2-deploy
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-east-1
+  TF_IN_AUTOMATION: "true"
+  ANSIBLE_NOCOLOR: "1"
+  ANSIBLE_FORKS: "1"
+
+jobs:
+  deploy:
+    name: Terraform and Ansible deployment
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Ansible and AWS collections
+        run: |
+          python3 -m pip install --quiet "ansible-core>=2.16" boto3 botocore
+          ansible-galaxy collection install amazon.aws community.aws
+
+      - name: Install SSM Session Manager plugin
+        run: |
+          curl -sSfL --retry 5 -o /tmp/ssm.deb \
+            https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb
+          sudo dpkg -i /tmp/ssm.deb
+          session-manager-plugin --version
+
+      - name: Configure AWS staging credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.10.3
+          terraform_wrapper: false
+
+      - name: Terraform init and validate
+        working-directory: assignment2/terraform
+        run: |
+          ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
+          terraform init -input=false \
+            -backend-config="bucket=acs730-tfstate-${ACCOUNT}"
+          terraform validate
+
+      - name: Terraform plan
+        working-directory: assignment2/terraform
+        run: terraform plan -input=false -no-color
+
+      - name: Terraform apply
+        working-directory: assignment2/terraform
+        run: terraform apply -input=false -auto-approve -no-color
+
+      - name: Ansible converge over SSM
+        working-directory: assignment2/ansible
+        run: |
+          set -euo pipefail
+
+          echo "Discovering EC2 instances through AWS tags"
+
+          HOSTS=$(ansible-inventory -i inventory/ --list |
+            python3 -c 'import json,sys; d=json.load(sys.stdin); print(len(d.get("role_web",{}).get("hosts",[])))')
+
+          test "$HOSTS" -eq 1
+
+          READY=0
+
+          for i in $(seq 1 40); do
+            if ansible -i inventory/ role_web \
+              -m ansible.builtin.ping; then
+              READY=1
+              break
+            fi
+
+            echo "Waiting for instance to respond through SSM ($i/40)"
+            sleep 10
+          done
+
+          test "$READY" -eq 1
+
+          ansible-playbook -i inventory/ site.yml -l role_web
+
+      - name: Verify web server response
+        working-directory: assignment2/terraform
+        run: |
+          IP=$(terraform output -raw first_web_public_ip)
+          curl -fsS --retry 12 --retry-delay 5 \
+            --retry-all-errors --max-time 10 "http://${IP}/" \
+            | grep 'ACS730 Assignment 2'
+
+          echo "PASS: Deployment and Ansible configuration verified"

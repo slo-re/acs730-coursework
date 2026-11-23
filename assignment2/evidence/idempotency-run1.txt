@@ -1,0 +1,29 @@
+
+PLAY [Configure the ACS730 Assignment 2 web servers] ***************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [i-04b8607654d918b9c]
+
+TASK [webserver : Install the packages the application needs] ******************
+ok: [i-04b8607654d918b9c]
+
+TASK [webserver : Create the unprivileged service account] *********************
+changed: [i-04b8607654d918b9c]
+
+TASK [webserver : Create the application directory] ****************************
+changed: [i-04b8607654d918b9c]
+
+TASK [webserver : Render the landing page from a template] *********************
+changed: [i-04b8607654d918b9c]
+
+TASK [webserver : Install the systemd unit from a template] ********************
+changed: [i-04b8607654d918b9c]
+
+TASK [webserver : Enable the service and make sure it is running] **************
+changed: [i-04b8607654d918b9c]
+
+RUNNING HANDLER [webserver : Restart acs730-web] *******************************
+changed: [i-04b8607654d918b9c]
+
+PLAY RECAP *********************************************************************
+i-04b8607654d918b9c        : ok=8    changed=6    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0

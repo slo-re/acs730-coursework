@@ -1,0 +1,5 @@
+assignment2/ansible/roles/webserver/defaults/main.yml
+assignment2/ansible/roles/webserver/handlers/main.yml
+assignment2/ansible/roles/webserver/tasks/main.yml
+assignment2/ansible/roles/webserver/templates/acs730-web.service.j2
+assignment2/ansible/roles/webserver/templates/index.html.j2
