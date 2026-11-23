@@ -1,0 +1,62 @@
+{
+    "Images": [
+        {
+            "PlatformDetails": "Linux/UNIX",
+            "UsageOperation": "RunInstances",
+            "BlockDeviceMappings": [
+                {
+                    "Ebs": {
+                        "DeleteOnTermination": true,
+                        "Iops": 3000,
+                        "SnapshotId": "snap-08059ac4312f6a343",
+                        "VolumeSize": 8,
+                        "VolumeType": "gp3",
+                        "Throughput": 125,
+                        "Encrypted": false
+                    },
+                    "DeviceName": "/dev/xvda"
+                }
+            ],
+            "EnaSupport": true,
+            "Hypervisor": "xen",
+            "Name": "acs730-a2-web-20261123-031848",
+            "RootDeviceName": "/dev/xvda",
+            "RootDeviceType": "ebs",
+            "SriovNetSupport": "simple",
+            "Tags": [
+                {
+                    "Key": "Project",
+                    "Value": "acs730"
+                },
+                {
+                    "Key": "Lab",
+                    "Value": "assignment2"
+                },
+                {
+                    "Key": "Role",
+                    "Value": "web"
+                },
+                {
+                    "Key": "Name",
+                    "Value": "acs730-a2-web-20261123-031848"
+                }
+            ],
+            "VirtualizationType": "hvm",
+            "BootMode": "uefi-preferred",
+            "ImdsSupport": "v2.0",
+            "SourceInstanceId": "i-022c58c0d4f38dda5",
+            "DeregistrationProtection": "disabled",
+            "SourceImageId": "ami-062caee4b7b602eb0",
+            "SourceImageRegion": "us-east-1",
+            "FreeTierEligible": true,
+            "ImageId": "ami-095bbfc6cc65eda87",
+            "ImageLocation": "071894848660/acs730-a2-web-20261123-031848",
+            "State": "available",
+            "OwnerId": "071894848660",
+            "CreationDate": "2026-11-23T03:20:19.000Z",
+            "Public": false,
+            "Architecture": "x86_64",
+            "ImageType": "machine"
+        }
+    ]
+}

@@ -1,0 +1,8 @@
+Method: Packer golden AMI
+Start event: EC2 instance LaunchTime
+End event: First observed HTTP 200 with correct Assignment 2 page
+Start (UTC): 2026-11-23T03:33:13+00:00
+End (UTC): 2026-11-23T03:33:32Z
+Instance type: t3.micro
+HTTP result: 200
+Boot-to-ready seconds: 19.0

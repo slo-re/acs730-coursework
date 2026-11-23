@@ -1,0 +1,8 @@
+Assignment 2 cleanup
+Golden timing EC2 instance: i-03b3c57905f133922 — terminated
+Terraform test EC2 instance: i-0f9d57aa8206278fb — destroyed
+Golden AMI: ami-095bbfc6cc65eda87 — deregistered
+Snapshot deleted: snap-08059ac4312f6a343
+Terraform state empty: yes
+
+Mon Nov 23 03:38:33 UTC 2026
